@@ -107,16 +107,16 @@ export class WishItemComponent extends Component<Props, State> {
                     </Dropzone>
                     {/* {this.state.image && <Button variant="outlined" onClick={e => this.setState({ image: undefined })}>Delete</Button>} */}
                 </div>
-                <div className="form-block">
-                    <form onSubmit={e => this.save(e)}>
-                        <TextField id="title" label="Title" variant="outlined" value={this.state.title ?? ""} onChange={e => this.setState({ title: e.target.value })} />
-                        <TextField id="outlined-textarea" label="Description" multiline value={this.state.description ?? ""} onChange={e => this.setState({ description: e.target.value })} />
-                        <TextField id="price" label="Price" variant="outlined" value={this.state.price ?? ""} onChange={e => this.onPriceUpdate(e.target.value)} />
-                        <Button variant="outlined" type="submit">Save</Button>
-                        {this.state.id != null && <Button variant="outlined" onClick={e => this.remove()}>Delete</Button>}
-                    </form>
-                </div>
 
+                <form className="form-block" onSubmit={e => this.save(e)}>
+                    <TextField id="title" label="Title" variant="outlined" value={this.state.title ?? ""} onChange={e => this.setState({ title: e.target.value })} />
+                    <TextField id="price" label="Price" variant="outlined" value={this.state.price ?? ""} onChange={e => this.onPriceUpdate(e.target.value)} />
+                    <TextField id="outlined-textarea" label="Description" multiline value={this.state.description ?? ""} onChange={e => this.setState({ description: e.target.value })} />
+                    <div className="form-button">
+                        {this.state.id != null && <Button variant="contained" color="error" onClick={e => this.remove()}>Delete</Button>}
+                        <Button variant="contained" type="submit" disabled={!this.state.title}>Save</Button>
+                    </div>
+                </form>
             </div >
 
         )

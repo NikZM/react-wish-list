@@ -19,6 +19,20 @@
   }
   .form-block {
     flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    .MuiFormControl-root {
+      margin-bottom: 10px;
+    }
+    .form-button {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap-reverse;
+      button {
+        flex: 1 1 45%;
+        margin: 5px;
+      }
+    }
   }
 }
 
