@@ -1,5 +1,5 @@
 import './wish-list.component.scss'
-import { Accordion, AccordionDetails, AccordionSummary, Button, FormControl, Input, InputAdornment, InputLabel, OutlinedInput, TextField, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, FormControl, InputAdornment, InputLabel, OutlinedInput, TextField, Typography } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Component, Fragment, useState } from "react";
 import { WishItem } from "../storage/wish-item.model";
@@ -8,8 +8,10 @@ import { IWishListProvider } from '../storage/wish-list.provider';
 import DoneIcon from '@mui/icons-material/Done';
 import ClearIcon from '@mui/icons-material/Clear';
 import Dropzone from 'react-dropzone';
-import Clear from '@mui/icons-material/Clear';
 import { LinkPreview } from '@dhaiwat10/react-link-preview';
+import { DatePicker } from '@mui/lab';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
 
 interface Props {
     item?: WishItem,
@@ -51,7 +53,7 @@ export class WishItemComponent extends Component<Props, State> {
         }
     }
 
-    async save(ev: any) {
+    private async save(ev: any) {
         ev.preventDefault();
         if (this.state.id != null) {
             await this.wishListProvider.update(this.state);
@@ -66,18 +68,14 @@ export class WishItemComponent extends Component<Props, State> {
         this.props.onChange?.call(this);
     }
 
-    remove() {
+    private remove() {
         if (this.state.id == null) return;
         this.wishListProvider.delete(this.state.id).then(() => {
             this.props.onChange?.call(this);
         });
     }
 
-    onPriceUpdate(price: string) {
-        this.setState({ price });
-    }
-
-    imageDrop(file: File[]) {
+    private imageDrop(file: File[]) {
         const reader = new FileReader();
         reader.readAsDataURL(file[0]);
         reader.onload = (e) => {
@@ -85,7 +83,7 @@ export class WishItemComponent extends Component<Props, State> {
         };
     }
 
-    addLink(value: string) {
+    private addLink(value: string) {
         if (!value) return;
         this.setState(s => {
             const links = s.links ? [...s.links] : [];
@@ -94,7 +92,7 @@ export class WishItemComponent extends Component<Props, State> {
         })
     }
 
-    removeLink(index: number) {
+    private removeLink(index: number) {
         if ((this.state.links ?? [])[index] == null) return;
         this.setState(s => {
             const links: string[] = [...s.links!];
@@ -105,51 +103,75 @@ export class WishItemComponent extends Component<Props, State> {
 
     render() {
         return (
-            <div className="wish-item-form" > { /* onClick={e => this.props.requestsClose?.call(this)}> */}
-                <div className="image-block">
-                    <Dropzone onDrop={acceptedFiles => this.imageDrop(acceptedFiles)}>
-                        {({ getRootProps, getInputProps }) => (
-                            <section className={'drag-zone' + (this.state.image ? ' has-image' : '')}>
-                                <div {...getRootProps()}>
-                                    <input {...getInputProps()} />
-                                    {this.state.image ?
-                                        <img src={this.state.image} alt={this.state.description} className="item-pic"></img>
-                                        :
-                                        <p>Drag & Drop files here or click to upload</p>}
-                                </div>
-                            </section>
-                        )}
-                    </Dropzone>
-                    {/* {this.state.image && <Button variant="outlined" onClick={e => this.setState({ image: undefined })}>Delete</Button>} */}
+            <Fragment>
+                <div className="drawer-top" onClick={e => this.props.requestsClose?.call(this)}>
                 </div>
+                <div className="wish-item-form" >
+                    <form className="form-block" onSubmit={e => this.save(e)}>
+                        <div className="form-body">
+                            <div className="form-section form-top">
+                                <div className="form-column form-top-left">
+                                    <ImageDropper image={this.state.image} description={this.state.description} onDrop={acceptedFiles => this.imageDrop(acceptedFiles)}></ImageDropper>
+                                    {/* {this.state.image && <Button variant="outlined" onClick={e => this.setState({ image: undefined })}>Delete</Button>} */}
+                                </div>
+                                <div className="form-column form-top-right">
+                                    <TextField className="form-input" id="title" required label="Title" variant="outlined" value={this.state.title ?? ""} onChange={e => this.setState({ title: e.target.value })} />
+                                    <FormControl className="form-input">
+                                        <InputLabel htmlFor="outlined-adornment-amount">Price</InputLabel>
+                                        <OutlinedInput
+                                            id="outlined-adornment-amount"
+                                            label="Price"
+                                            inputMode="decimal"
+                                            value={this.state.price ?? ""}
+                                            onChange={e => this.setState({ price: e.target.value })}
+                                            startAdornment={<InputAdornment position="start">£</InputAdornment>}
+                                        />
+                                    </FormControl>
+                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                        <DatePicker
+                                            label="Due Date"
+                                            inputFormat="dd/MM/yyyy"
+                                            onChange={date => {
+                                                this.setState({ dueDate: date?.toISOString() })
+                                            }}
+                                            value={this.state.dueDate ? new Date(this.state.dueDate) : null}
+                                            renderInput={(params) => <TextField className="form-input" {...params} />}></DatePicker>
+                                    </LocalizationProvider>
+                                    <LinkAccordian className="form-input link-accordian" links={this.state.links} onConfirm={val => this.addLink(val)} onRemove={index => this.removeLink(index)}></LinkAccordian>
+                                </div>
+                            </div>
+                            <div className="form-section form-middle">
+                                <TextField className="form-input" label="Description" multiline value={this.state.description ?? ""} onChange={e => this.setState({ description: e.target.value })} />
+                            </div>
+                        </div>
 
-                <form className="form-block" onSubmit={e => this.save(e)}>
-                    <div className="field-block">
-                        <TextField id="title" required label="Title" variant="outlined" value={this.state.title ?? ""} onChange={e => this.setState({ title: e.target.value })} />
-                        <FormControl>
-                            <InputLabel htmlFor="outlined-adornment-amount">Price</InputLabel>
-                            <OutlinedInput
-                                id="outlined-adornment-amount"
-                                label="Price"
-                                inputMode="decimal"
-                                value={this.state.price ?? ""}
-                                onChange={e => this.onPriceUpdate(e.target.value)}
-                                startAdornment={<InputAdornment position="start">£</InputAdornment>}
-                            />
-                        </FormControl>
-                        <TextField id="outlined-textarea" label="Description" multiline value={this.state.description ?? ""} onChange={e => this.setState({ description: e.target.value })} />
-                        <LinkAccordian className="link-accordian" links={this.state.links} onConfirm={val => this.addLink(val)} onRemove={index => this.removeLink(index)}></LinkAccordian>
-                    </div>
-
-                    <div className="form-button">
-                        {this.state.id != null && <Button variant="contained" color="error" onClick={e => this.remove()}>Delete</Button>}
-                        <Button variant="contained" type="submit" disabled={!this.state.title}>Save</Button>
-                    </div>
-                </form>
-            </div >
-
+                        <div className="form-section form-bottom">
+                            <div className="form-button">
+                                {this.state.id != null && <Button variant="contained" color="error" onClick={e => this.remove()}>Delete</Button>}
+                                <Button variant="contained" type="submit" disabled={!this.state.title}>Save</Button>
+                            </div>
+                        </div>
+                    </form>
+                </div >
+            </Fragment>
         )
     }
+}
+
+function ImageDropper(props: { image?: string, description?: string, onDrop: (files: File[]) => void }) {
+    return (<Dropzone onDrop={props.onDrop}>
+        {({ getRootProps, getInputProps }) => (
+            <section className={'drag-zone' + (props.image ? ' has-image' : '')}>
+                <div {...getRootProps()}>
+                    <input {...getInputProps()} />
+                    {props.image ?
+                        <img src={props.image} alt={props.description} className="item-pic"></img>
+                        :
+                        <p>Drag & Drop files here or click to upload</p>}
+                </div>
+            </section>
+        )}
+    </Dropzone>)
 }
 
 function LinkAccordian(props: { className?: string, links?: string[], onConfirm: (value: string) => void, onRemove: (index: number) => void }) {
@@ -165,26 +187,24 @@ function LinkAccordian(props: { className?: string, links?: string[], onConfirm:
             </AccordionSummary>
             <AccordionDetails>
                 {props.links?.map((link, index) => {
-                    return (<Fragment key={`link-${index}`} >
+                    return (<div className="existing-link-input" key={`link-${index}`} >
                         <LinkPreview className="link-preview" imageHeight="100px" url={link} fallback={
                             <Fragment>
                                 <a href={link}>{link}</a>
                             </Fragment>
 
                         }></LinkPreview>
-                        <Button onClick={e => props.onRemove(index)}><Clear></Clear></Button>
-                    </Fragment>)
+                        <Button onClick={e => props.onRemove(index)}><ClearIcon></ClearIcon></Button>
+                    </div>)
                 })}
-                <Fragment>
-                    <TextField variant="outlined" value={newLink} onChange={e => setNewLink(e.target.value)} />
+                <div className="new-link-input">
+                    <TextField className="form-input" size="small" variant="outlined" value={newLink} onChange={e => setNewLink(e.target.value)} />
                     <Button onClick={e => {
                         setNewLink("");
                         props.onConfirm(newLink);
                     }}><DoneIcon></DoneIcon></Button>
-                </Fragment>
+                </div>
             </AccordionDetails>
         </Accordion>
     )
-
 }
-

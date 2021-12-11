@@ -26,9 +26,26 @@ export class WishList extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        this.wishListProvider.getAll().then(items => {
-            this.setState({ wishlist: items });
-        });
+        this.wishListProvider.getAll()
+            .then(items => [...items].sort(this.sortItemByDate))
+            .then(items => {
+                this.setState({ wishlist: items });
+            });
+    }
+
+    private sortItemByDate(a: WishItem, b: WishItem): number {
+        if (a.dueDate && !b.dueDate) {
+            return -1;
+        }
+        else if (!a.dueDate && b.dueDate) {
+            return 1;
+        }
+        else if (!a.dueDate && !b.dueDate) {
+            return 0;
+        }
+        else {
+            return new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime();
+        }
     }
 
     delete(index: number) {
@@ -45,22 +62,24 @@ export class WishList extends React.Component<Props, State> {
     }
 
     onChange() {
-        this.wishListProvider.getAll().then(items => {
-            // Delete
-            if (this.state.currentItem?.id && items.findIndex(item => item.id === this.state.currentItem?.id) < 0) {
-                this.setState({ currentItem: undefined });
-            }
-            // Add
-            else if (!this.state.currentItem) {
-                const newItems = items.filter(item => !this.state.wishlist.find(ii => ii.id === item.id));
-                if (newItems.length === 1) {
-                    this.setState({
-                        currentItem: newItems[0]
-                    });
+        this.wishListProvider.getAll()
+            .then(items => items.sort(this.sortItemByDate))
+            .then(items => {
+                // Delete
+                if (this.state.currentItem?.id && items.findIndex(item => item.id === this.state.currentItem?.id) < 0) {
+                    this.setState({ currentItem: undefined });
                 }
-            }
-            this.setState({ wishlist: items });
-        });
+                // Add
+                else if (!this.state.currentItem) {
+                    const newItems = items.filter(item => !this.state.wishlist.find(ii => ii.id === item.id));
+                    if (newItems.length === 1) {
+                        this.setState({
+                            currentItem: newItems[0]
+                        });
+                    }
+                }
+                this.setState({ wishlist: items });
+            });
     }
 
     toggleDrawerState() {
@@ -115,8 +134,8 @@ export class WishList extends React.Component<Props, State> {
                     }
                 </List>
                 <div className="click-away" onClick={e => this.toggleDrawerState()}></div>
-                <SwipeableDrawer variant="persistent" anchor="bottom" disableBackdropTransition={!iOS} disableDiscovery={iOS} onOpen={() => { }} onClose={() => { }} open={this.state.drawerOpen}>
-                    <WishItemComponent requestsClose={() => this.setState({ drawerOpen: false})} item={this.state.currentItem} onChange={() => this.onChange()}></WishItemComponent>
+                <SwipeableDrawer className="bottom-drawer" variant="persistent" anchor="bottom" disableBackdropTransition={!iOS} disableDiscovery={iOS} onOpen={() => { }} onClose={() => { }} open={this.state.drawerOpen} >
+                    <WishItemComponent requestsClose={() => this.setState({ drawerOpen: false, currentItem: undefined })} item={this.state.currentItem} onChange={() => this.onChange()}></WishItemComponent>
                 </SwipeableDrawer>
 
             </div>

@@ -7,7 +7,7 @@ export interface WishItem {
     description?: string;
     price?: string;
     links?: string[];
-    period?: WishItemPeriod;
+    dueDate?: string;
 }
 
 export type WishList = WishItem[];
