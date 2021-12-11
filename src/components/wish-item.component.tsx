@@ -91,24 +91,32 @@ export class WishItemComponent extends Component<Props, State> {
     render() {
         return (
             <div className="wish-item-form">
-                <form onSubmit={e => this.save(e)}>
-                    <TextField id="title" label="Title" variant="outlined" value={this.state.title ?? ""} onChange={e => this.setState(s => ({ ...s, title: e.target.value }))} />
-                    <TextField id="outlined-textarea" label="Description" multiline value={this.state.description ?? ""} onChange={e => this.setState(s => ({ ...s, description: e.target.value }))} />
-                    <TextField id="price" label="Price" variant="outlined" value={this.state.price ?? ""} onChange={e => this.onPriceUpdate(e.target.value)} />
-                    <Button variant="outlined" type="submit">Save</Button>
-                    {this.state.id != null && <Button variant="outlined" onClick={e => this.remove()}>Delete</Button>}
-                    {this.state.image && <img src={this.state.image} alt={this.state.description} className="item-pic"></img>}
+                <div className="image-block">
                     <Dropzone onDrop={acceptedFiles => this.imageDrop(acceptedFiles)}>
                         {({ getRootProps, getInputProps }) => (
                             <section>
                                 <div {...getRootProps()}>
                                     <input {...getInputProps()} />
-                                    <p>Drag 'n' drop some files here, or click to select files</p>
+                                    {this.state.image ?
+                                        <img src={this.state.image} alt={this.state.description} className="item-pic"></img>
+                                        :
+                                        <p>Drag 'n' drop some files here, or click to select files</p>}
                                 </div>
                             </section>
                         )}
                     </Dropzone>
-                </form>
+                    {/* {this.state.image && <Button variant="outlined" onClick={e => this.setState({ image: undefined })}>Delete</Button>} */}
+                </div>
+                <div className="form-block">
+                    <form onSubmit={e => this.save(e)}>
+                        <TextField id="title" label="Title" variant="outlined" value={this.state.title ?? ""} onChange={e => this.setState({ title: e.target.value })} />
+                        <TextField id="outlined-textarea" label="Description" multiline value={this.state.description ?? ""} onChange={e => this.setState({ description: e.target.value })} />
+                        <TextField id="price" label="Price" variant="outlined" value={this.state.price ?? ""} onChange={e => this.onPriceUpdate(e.target.value)} />
+                        <Button variant="outlined" type="submit">Save</Button>
+                        {this.state.id != null && <Button variant="outlined" onClick={e => this.remove()}>Delete</Button>}
+                    </form>
+                </div>
+
             </div >
 
         )

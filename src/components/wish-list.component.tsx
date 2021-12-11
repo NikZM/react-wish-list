@@ -1,17 +1,16 @@
-
-
+import './wish-item.component.scss';
 import { Avatar, Divider, List, ListItemAvatar, ListItemButton, ListItemText, SwipeableDrawer, Typography } from "@mui/material";
 import React from "react";
 import { container } from "../ioc";
 import { WishItem } from "../storage/wish-item.model";
 import { IWishListProvider } from "../storage/wish-list.provider";
 import { WishItemComponent } from "./wish-item.component";
-import './wish-item.component.scss';
 
 interface Props { }
 interface State {
     wishlist: WishItem[];
     currentItem?: WishItem;
+    drawerOpen: boolean;
 }
 
 export class WishList extends React.Component<Props, State> {
@@ -22,6 +21,7 @@ export class WishList extends React.Component<Props, State> {
         super(props);
         this.state = {
             wishlist: [],
+            drawerOpen: true,
         }
     }
 
@@ -36,7 +36,12 @@ export class WishList extends React.Component<Props, State> {
     }
 
     setFocus(item?: WishItem) {
-        this.setState({ currentItem: item });
+        if (this.state.currentItem === item) {
+            this.setState({ drawerOpen: false, currentItem: undefined })
+        }
+        else {
+            this.setState({ currentItem: item, drawerOpen: true });
+        }
     }
 
     onChange() {
@@ -58,7 +63,19 @@ export class WishList extends React.Component<Props, State> {
         });
     }
 
-
+    toggleDrawerState() {
+        if (this.state.drawerOpen) {
+            if (this.state.currentItem) {
+                this.setState({ currentItem: undefined });
+            }
+            else {
+                this.setState({ drawerOpen: false });
+            }
+        }
+        else {
+            this.setState({ drawerOpen: true });
+        }
+    }
 
     render() {
         const iOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -97,8 +114,8 @@ export class WishList extends React.Component<Props, State> {
                         })
                     }
                 </List>
-                <div className="click-away" onClick={e => this.setFocus(undefined)}></div>
-                <SwipeableDrawer variant="persistent" anchor="bottom" disableBackdropTransition={!iOS} disableDiscovery={iOS} onOpen={() => { }} onClose={() => { }} open={true} >
+                <div className="click-away" onClick={e => this.toggleDrawerState()}></div>
+                <SwipeableDrawer variant="persistent" anchor="bottom" disableBackdropTransition={!iOS} disableDiscovery={iOS} onOpen={() => { }} onClose={() => { }} open={this.state.drawerOpen}>
                     <WishItemComponent item={this.state.currentItem} onChange={() => this.onChange()}></WishItemComponent>
                 </SwipeableDrawer>
 
