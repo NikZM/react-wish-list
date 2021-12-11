@@ -116,7 +116,7 @@ export class WishList extends React.Component<Props, State> {
                 </List>
                 <div className="click-away" onClick={e => this.toggleDrawerState()}></div>
                 <SwipeableDrawer variant="persistent" anchor="bottom" disableBackdropTransition={!iOS} disableDiscovery={iOS} onOpen={() => { }} onClose={() => { }} open={this.state.drawerOpen}>
-                    <WishItemComponent item={this.state.currentItem} onChange={() => this.onChange()}></WishItemComponent>
+                    <WishItemComponent requestsClose={() => this.setState({ drawerOpen: false})} item={this.state.currentItem} onChange={() => this.onChange()}></WishItemComponent>
                 </SwipeableDrawer>
 
             </div>
