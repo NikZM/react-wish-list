@@ -132,9 +132,9 @@ export class WishItemComponent extends Component<Props, State> {
                                             label="Due Date"
                                             inputFormat="dd/MM/yyyy"
                                             onChange={date => {
-                                                this.setState({ dueDate: date?.toISOString() })
+                                                this.setState({ expectedDate: date?.toISOString() })
                                             }}
-                                            value={this.state.dueDate ? new Date(this.state.dueDate) : null}
+                                            value={this.state.expectedDate ? new Date(this.state.expectedDate) : null}
                                             renderInput={(params) => <TextField className="form-input" {...params} />}></DatePicker>
                                     </LocalizationProvider>
                                     <LinkAccordian className="form-input link-accordian" links={this.state.links} onConfirm={val => this.addLink(val)} onRemove={index => this.removeLink(index)}></LinkAccordian>

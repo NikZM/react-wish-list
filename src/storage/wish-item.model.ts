@@ -1,5 +1,3 @@
-import { WishItemPeriod } from "./wish-item-period.model";
-
 export interface WishItem {
     id?: number;
     image?: string;
@@ -7,7 +5,9 @@ export interface WishItem {
     description?: string;
     price?: string;
     links?: string[];
-    dueDate?: string;
+    expectedDate?: string;
+    purchaseDate?: string;
+    hidden?: boolean;
 }
 
 export type WishList = WishItem[];

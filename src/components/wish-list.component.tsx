@@ -34,17 +34,17 @@ export class WishList extends React.Component<Props, State> {
     }
 
     private sortItemByDate(a: WishItem, b: WishItem): number {
-        if (a.dueDate && !b.dueDate) {
+        if (a.expectedDate && !b.expectedDate) {
             return -1;
         }
-        else if (!a.dueDate && b.dueDate) {
+        else if (!a.expectedDate && b.expectedDate) {
             return 1;
         }
-        else if (!a.dueDate && !b.dueDate) {
+        else if (!a.expectedDate && !b.expectedDate) {
             return 0;
         }
         else {
-            return new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime();
+            return new Date(a.expectedDate!).getTime() - new Date(b.expectedDate!).getTime();
         }
     }
 
