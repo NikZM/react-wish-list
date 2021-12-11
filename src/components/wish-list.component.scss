@@ -1,0 +1,9 @@
+.wishlist {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 calc(100vh - 100px);
+}
+
+.click-away {
+    flex: 1 1 auto;
+}

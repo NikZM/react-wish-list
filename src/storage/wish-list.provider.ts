@@ -4,7 +4,7 @@ import { WishItem, WishList } from "./wish-item.model";
 export abstract class IWishListProvider {
     abstract get(index: number): Promise<WishItem>;
     abstract getAll(): Promise<WishList>;
-    abstract add(item: Omit<WishItem, 'id'>): Promise<WishItem>;
+    abstract add(item: Omit<WishItem, 'id'>): Promise<void>;
     abstract update(item: WishItem): Promise<void>;
     abstract delete(index: number): Promise<void>
 }
@@ -91,10 +91,10 @@ export class WishListProvider {
         const transaction = (await this.database).transaction(['items'], 'readwrite');
         const result = transaction.objectStore('items').add(item);
 
-        return new Promise<WishItem>((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             result.onsuccess = (ev: Event) => {
-                const id: number = (ev.target as IDBRequest).result;
-                resolve({ ...item, id });
+                // const id: number = (ev.target as IDBRequest).result;
+                resolve();
             }
 
             result.onerror = () => {
@@ -105,7 +105,7 @@ export class WishListProvider {
 
     public async update(item: WishItem) {
         const transaction = (await this.database).transaction(['items'], 'readwrite');
-        const result = transaction.objectStore('items').put(item, item.id);
+        const result = transaction.objectStore('items').put(item);
 
         return new Promise<void>((resolve, reject) => {
             result.onsuccess = () => {
