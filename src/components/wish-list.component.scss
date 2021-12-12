@@ -9,3 +9,13 @@
     border-radius: 14px 14px 0 0;
   
 }
+
+.month-header {
+    text-align: end;
+}
+
+.list-item {
+  .price {
+    flex: 0 0 auto;
+  }
+}

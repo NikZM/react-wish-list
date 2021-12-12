@@ -1,6 +1,6 @@
 import './wish-item.component.scss';
-import { Avatar, Divider, List, ListItemAvatar, ListItemButton, ListItemText, SwipeableDrawer, Typography } from "@mui/material";
-import React from "react";
+import { Avatar, Divider, List, ListItemAvatar, ListItemButton, ListItemText, ListSubheader, SwipeableDrawer, Typography } from "@mui/material";
+import { Component, Fragment } from "react";
 import { container } from "../ioc";
 import { WishItem } from "../storage/wish-item.model";
 import { IWishListProvider } from "../storage/wish-list.provider";
@@ -13,7 +13,7 @@ interface State {
     drawerOpen: boolean;
 }
 
-export class WishList extends React.Component<Props, State> {
+export class WishList extends Component<Props, State> {
 
     private readonly wishListProvider: IWishListProvider = container.get(IWishListProvider);
 
@@ -61,6 +61,29 @@ export class WishList extends React.Component<Props, State> {
         }
     }
 
+    get listByMonth(): { title?: string, items: WishItem[] }[] {
+        return this.state.wishlist.reduce<{ title?: string, items: WishItem[] }[]>((acc, val) => {
+            const date = val.expectedDate ? new Date(val.expectedDate) : null;
+            const iMonth: { title?: string, items: WishItem[] } | undefined = acc[acc.length - 1];
+            if (date == null) {
+                console.log('title', iMonth, iMonth.title != null, val)
+                if (iMonth.title != null) {
+                    acc.push({ items: [] as WishItem[] });
+                }
+                iMonth.items.push(val);
+                return acc;
+            }
+            const title = date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+            if ((iMonth?.title ?? null) === title) {
+                iMonth.items.push(val);
+            }
+            else {
+                acc.push({ title, items: [val] });
+            }
+            return acc;
+        }, []);
+    }
+
     onChange() {
         this.wishListProvider.getAll()
             .then(items => items.sort(this.sortItemByDate))
@@ -102,33 +125,43 @@ export class WishList extends React.Component<Props, State> {
             <div className="wishlist">
                 <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
                     {
-                        this.state.wishlist.map(item => {
+                        this.listByMonth.map(month => {
                             return (
-                                <React.Fragment key={item.id}>
-                                    <ListItemButton alignItems="flex-start" selected={this.state.currentItem?.id === item.id}
-                                        onClick={(event) => this.setFocus(item)}>
-                                        <ListItemAvatar>
-                                            <Avatar alt="Remy Sharp" src={item.image} />
-                                        </ListItemAvatar>
-                                        <ListItemText
-                                            primary={item.title}
-                                            secondary={
-                                                <React.Fragment>
-                                                    <Typography
-                                                        sx={{ display: 'inline' }}
-                                                        component="span"
-                                                        variant="body2"
-                                                        color="text.primary"
-                                                    >
-                                                        {item.description}
-                                                    </Typography>
+                                <Fragment key={month.title ?? 'other'}>
+                                    <ListSubheader className="month-header">{month.title ?? 'other'}</ListSubheader>
+                                    {
+                                        month.items.map(item => {
+                                            return (
+                                                <Fragment key={item.id}>
+                                                    <ListItemButton className="list-item" alignItems="flex-start" selected={this.state.currentItem?.id === item.id}
+                                                        onClick={(event) => this.setFocus(item)}>
+                                                        <ListItemAvatar>
+                                                            <Avatar alt="Remy Sharp" src={item.image} />
+                                                        </ListItemAvatar>
+                                                        <ListItemText
+                                                            primary={item.title}
+                                                            secondary={
+                                                                <Fragment>
+                                                                    <Typography
+                                                                        sx={{ display: 'inline' }}
+                                                                        component="span"
+                                                                        variant="body2"
+                                                                        color="text.primary"
+                                                                    >
+                                                                        {item.description}
+                                                                    </Typography>
 
-                                                </React.Fragment>
-                                            }
-                                        />
-                                    </ListItemButton>
-                                    <Divider variant="fullWidth" component="li" />
-                                </React.Fragment>
+                                                                </Fragment>
+                                                            }
+                                                        />
+                                                        <ListItemText className="price">{item.price && `£${item.price}`}</ListItemText>
+                                                    </ListItemButton>
+                                                    <Divider variant="fullWidth" component="li" />
+                                                </Fragment>
+                                            )
+                                        })
+                                    }
+                                </Fragment>
                             );
                         })
                     }

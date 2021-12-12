@@ -8,6 +8,7 @@ export interface WishItem {
     expectedDate?: string;
     purchaseDate?: string;
     hidden?: boolean;
+    tags?: Set<string>
 }
 
 export type WishList = WishItem[];
